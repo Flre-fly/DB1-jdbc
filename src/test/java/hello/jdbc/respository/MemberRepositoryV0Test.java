@@ -7,6 +7,7 @@ import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.sql.SQLException;
+import java.util.NoSuchElementException;
 
 @Slf4j
 public class MemberRepositoryV0Test {
@@ -15,7 +16,7 @@ public class MemberRepositoryV0Test {
     @Test
     void crud() throws SQLException {
         //save
-        Member member = new Member("a", 10000);
+        Member member = new Member("11121asd", 10000);
         repositoryV0.save(member);
 
         //findById
@@ -24,7 +25,13 @@ public class MemberRepositoryV0Test {
         log.info(" ==비교 결과: {}", findMember==member);
         log.info("isEqual비교결과:  {}", member.equals(findMember));
 
-        //인스턴스비교(==비교)가 아니라 equalto를 사용한 값 비교를 사용했기때문에 true가 나온다
-        Assertions.assertThat(findMember).isEqualTo(member);
-    }
+        //update: money: 10000 -> 20000
+        repositoryV0.update(member.getMember_id(), 20000);
+        Member updatedMember = repositoryV0.findById(member.getMember_id());
+
+        repositoryV0.delete(member.getMember_id());
+
+        Assertions.assertThatThrownBy(()-> repositoryV0.findById(member.getMember_id()))
+                        .isInstanceOf(NoSuchElementException.class);
+   }
 }
