@@ -1,9 +1,11 @@
 package hello.jdbc.connection;
 
+import com.zaxxer.hikari.HikariDataSource;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
 
+import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
@@ -20,7 +22,19 @@ public class ConnectionTest {
         log.info("con1: {}, {}", con1, con1.getClass());
         log.info("con2: {}, {}", con2, con2.getClass());
     }
+    @Test
+    void dataSourceConnectionPool() throws SQLException, InterruptedException {
 
+        HikariDataSource dataSource = new HikariDataSource();
+        dataSource.setJdbcUrl(URL);
+        dataSource.setUsername(USERNAME);
+        dataSource.setPassword(PASSWORD);
+        dataSource.setMaximumPoolSize(10);
+        dataSource.setPoolName("풀이름");
+
+        useDataSource(dataSource);
+        Thread.sleep(1000);//왜?
+    }
     @Test
     void dataSourceDriverManager() throws SQLException {
         //DataSourceDriverManager도 getConnection할때마다 매번 새로운 커넥션을 생성한다
@@ -29,7 +43,7 @@ public class ConnectionTest {
         useDataSource(dataSource);
     }
 
-    private void useDataSource(DriverManagerDataSource dataSource) throws SQLException {
+    private void useDataSource(DataSource dataSource) throws SQLException {
         Connection con1 = dataSource.getConnection();
         Connection con2 = dataSource.getConnection();
         log.info("con1: {}, {}", con1, con1.getClass());
