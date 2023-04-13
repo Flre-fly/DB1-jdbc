@@ -1,5 +1,6 @@
 package hello.jdbc.respository;
 
+import com.zaxxer.hikari.HikariDataSource;
 import hello.jdbc.domain.Member;
 import hello.jdbc.repository.MemberRepositoryV0;
 import hello.jdbc.repository.MemberRepositoryV1;
@@ -21,12 +22,16 @@ public class MemberRepositoryV1Test {
 
     @BeforeEach
     void init(){
-        DriverManagerDataSource dataSource = new DriverManagerDataSource(URL, USERNAME, PASSWORD);
+        //DriverManagerDataSource dataSource = new DriverManagerDataSource(URL, USERNAME, PASSWORD);
+        HikariDataSource dataSource = new HikariDataSource();
+        dataSource.setPassword(PASSWORD);
+        dataSource.setUsername(USERNAME);
+        dataSource.setJdbcUrl(URL);
         repositoryV1 = new MemberRepositoryV1(dataSource);
     }
 
     @Test
-    void crud() throws SQLException {
+    void crud() throws SQLException, InterruptedException {
         //save
         Member member = new Member("11121asd", 10000);
         repositoryV1.save(member);
@@ -45,5 +50,6 @@ public class MemberRepositoryV1Test {
 
         Assertions.assertThatThrownBy(()-> repositoryV1.findById(member.getMember_id()))
                         .isInstanceOf(NoSuchElementException.class);
+        Thread.sleep(3000);
    }
 }
