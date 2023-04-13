@@ -3,13 +3,21 @@ package hello.jdbc.repository;
 import hello.jdbc.connection.DBConnectionUtil;
 import hello.jdbc.domain.Member;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.jdbc.support.JdbcUtils;
 
+import javax.sql.DataSource;
 import java.sql.*;
 import java.util.NoSuchElementException;
 
 @Slf4j
-// JDBC - DriverManager 사용해보기
+// JDBC - DataSource, JdbcUtils 사용해보기
 public class MemberRepositoryV1 {
+
+    private final DataSource dataSource;
+
+    public MemberRepositoryV1(DataSource dataSource){
+        this.dataSource = dataSource;
+    }
 
     public void delete(String memberId) throws SQLException {
         String sql = "delete from member where member_id=?";
@@ -110,31 +118,13 @@ public class MemberRepositoryV1 {
 
     }
     private void close(Connection connection, Statement stmt, ResultSet rs){
-        if(rs != null){
-            try{
-                rs.close();
-            }catch (SQLException e){
-                log.info("error: ", e);
-            }
-        }
-
-        //stmt exception이 터져도 try-catch로 잡기 때문에 connetion 을 닫을 수 있다
-        if(stmt != null){
-            try{
-                stmt.close();
-            }catch (SQLException e){
-                log.info("error: ", e);
-            }
-        }
-        if(connection != null){
-            try{
-                connection.close();
-            }catch (SQLException e){
-                log.info("error: ", e);
-            }
-        }
+        JdbcUtils.closeResultSet(rs);
+        JdbcUtils.closeStatement(stmt);
+        JdbcUtils.closeConnection(connection);
     }
-    private Connection getConnection(){
-        return DBConnectionUtil.getConnection();
+    private Connection getConnection() throws SQLException {
+        Connection con = dataSource.getConnection();
+        log.info("get connection: {}. class={}", con, con.getClass());
+        return con;
     }
 }
