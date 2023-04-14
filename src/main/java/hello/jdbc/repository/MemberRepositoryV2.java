@@ -61,6 +61,25 @@ public class MemberRepositoryV2 {
             close(connection, pstmt, null);
         }
     }
+    public void update(Connection connection, String memberId, int money) throws SQLException {
+        String sql = "update member set money = ? where member_id = ?";
+
+        PreparedStatement pstmt = null;
+        log.info("sql: {}", sql);
+        try{
+            pstmt = connection.prepareStatement(sql);
+            pstmt.setInt(1, money);
+            pstmt.setString(2, memberId);
+            int resultSize = pstmt.executeUpdate();//sql을 커넥션을 통해 db에 전달
+            log.info("resultSize = {}", resultSize);
+            //반환값 = 영향받은 row수
+        }catch (SQLException e){
+            log.error("db error", e);
+            throw e;//예외 다시 던지기
+        }finally {
+            JdbcUtils.closeStatement(pstmt);
+        }
+    }
     public Member findById(String memberId) throws SQLException {
         String sql = "select * from member where member_id = ?";
 
@@ -89,6 +108,37 @@ public class MemberRepositoryV2 {
             throw e;
         }finally {
             close(con, pstmt, rs);
+        }
+    }
+
+    public Member findById(Connection con, String memberId) throws SQLException {
+        String sql = "select * from member where member_id = ?";
+
+        PreparedStatement pstmt = null;
+        ResultSet rs = null;
+
+        try {
+            pstmt = con.prepareStatement(sql);
+            pstmt.setString(1, memberId);
+
+            rs = pstmt.executeQuery();
+
+            //단건조회이기 때문에 0건아니면 1건 조회되니까 rs.next를 1회호출하였다
+            if (rs.next()) {
+                Member member = new Member();
+                member.setMember_id(rs.getString("member_id"));
+                member.setMoney(rs.getInt("money"));
+                return member;
+            } else {
+                throw new NoSuchElementException("member not found! memberid: {}"+ memberId);
+            }
+        }catch (SQLException e){
+            log.error("db error", e);
+            throw e;
+        }finally {
+            //connection은 닫지않는다
+            JdbcUtils.closeResultSet(rs);
+            JdbcUtils.closeStatement(pstmt);
         }
     }
 
