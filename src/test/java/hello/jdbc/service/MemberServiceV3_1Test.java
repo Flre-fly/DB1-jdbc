@@ -1,14 +1,15 @@
 package hello.jdbc.service;
 
 import hello.jdbc.domain.Member;
-import hello.jdbc.repository.MemberRepositoryV2;
-import hello.jdbc.repository.service.MemberServiceV2;
+import hello.jdbc.repository.MemberRepositoryV3;
+import hello.jdbc.repository.service.MemberServiceV3_1;
 import lombok.extern.slf4j.Slf4j;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
 
 import java.sql.SQLException;
@@ -17,19 +18,19 @@ import static hello.jdbc.connection.ConnectionConst.*;
 
 //트랜잭션이 없어서 문제가 발생한다
 @Slf4j
-public class MemberServiceV2Test {
+public class MemberServiceV3_1Test {
     public static final String MEMBER_A = "memberA";
     public static final String MEMBER_B = "memberB";
     public static final String ERROR_MEMBER = "error";
 
-    private MemberRepositoryV2 memberRepository;
-    private MemberServiceV2 memberService;
+    private MemberRepositoryV3 memberRepository;
+    private MemberServiceV3_1 memberService;
 
     @BeforeEach
     void init() throws SQLException {
         DriverManagerDataSource dataSource = new DriverManagerDataSource(URL, USERNAME, PASSWORD);
-        memberRepository = new MemberRepositoryV2(dataSource);
-        memberService = new MemberServiceV2(memberRepository, dataSource);
+        memberRepository = new MemberRepositoryV3(dataSource);
+        memberService = new MemberServiceV3_1(new DataSourceTransactionManager(dataSource), memberRepository);
     }
 
     @AfterEach

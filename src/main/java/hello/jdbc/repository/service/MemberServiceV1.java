@@ -1,4 +1,4 @@
-package hello.jdbc.service;
+package hello.jdbc.repository.service;
 
 import hello.jdbc.domain.Member;
 import hello.jdbc.repository.MemberRepositoryV1;
